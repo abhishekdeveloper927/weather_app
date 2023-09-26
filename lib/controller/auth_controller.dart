@@ -75,7 +75,7 @@ class AuthController extends GetxController implements GetxService {
   Future<void> getAddressFromLatLng(String lat, String lng) async {
     await http
         .get(Uri.parse(
-        'https://maps.googleapis.com/maps/api/geocode/json?latlng=$lat,$lng&key=AIzaSyCjUv0dmUvMZGgvW3QRtDq-k5VIq-M2xW4'))
+            'https://maps.googleapis.com/maps/api/geocode/json?latlng=$lat,$lng&key=AIzaSyCjUv0dmUvMZGgvW3QRtDq-k5VIq-M2xW4'))
         .then((value) {
       currentAddressModel = addressModelFromJson(value.body);
     });
@@ -85,13 +85,17 @@ class AuthController extends GetxController implements GetxService {
   WeatherModel? weatherModel;
 
   Future<void> getWeatherFromLatLng(String lat, String lng) async {
-    await http
-        .get(Uri.parse(
-        "https://api.open-meteo.com/v1/forecast?latitude=$lat&longitude=$lng&current_weather=true"))
-        .then((value) {
-      weatherModel = weatherModelFromJson(value.body);
-      print(value.body);
-    });
+    try {
+      await http
+          .get(Uri.parse(
+              "https://api.open-meteo.com/v1/forecast?latitude=$lat&longitude=$lng&current_weather=true"))
+          .then((value) {
+        weatherModel = weatherModelFromJson(value.body);
+        print(value.body);
+      });
+    } catch (e) {
+      showCustomSnackBar(e.toString(), isError: true);
+    }
     update();
   }
 
@@ -99,20 +103,21 @@ class AuthController extends GetxController implements GetxService {
   WeatherModel2? newWeatherModel2;
 
   Future<void> get7DaysWeatherFromLatLng(String lat, String lng) async {
-    await http
-        .get(Uri.parse(
-        "https://api.open-meteo.com/v1/forecast?latitude=$lat&longitude=$lng&current_weather=true&start_date=${DateFormat(
-            'yyyy-MM-dd').format(DateTime.now())}&end_date=${DateFormat(
-            'yyyy-MM-dd').format(DateTime.now().add(
-            const Duration(days: 6)))}&hourly=temperature_2m"))
-        .then((value) {
-      if (selectedCityModel != null) {
-        newWeatherModel2 = weatherModel2FromJson(value.body);
-      } else {
-        weatherModel2 = weatherModel2FromJson(value.body);
-      }
-      print(value.body);
-    });
+    try {
+      await http
+          .get(Uri.parse(
+              "https://api.open-meteo.com/v1/forecast?latitude=$lat&longitude=$lng&current_weather=true&start_date=${DateFormat('yyyy-MM-dd').format(DateTime.now())}&end_date=${DateFormat('yyyy-MM-dd').format(DateTime.now().add(const Duration(days: 6)))}&hourly=temperature_2m"))
+          .then((value) {
+        if (selectedCityModel != null) {
+          newWeatherModel2 = weatherModel2FromJson(value.body);
+        } else {
+          weatherModel2 = weatherModel2FromJson(value.body);
+        }
+        print(value.body);
+      });
+    } catch (e) {
+      showCustomSnackBar(e.toString(), isError: true);
+    }
     update();
   }
 
